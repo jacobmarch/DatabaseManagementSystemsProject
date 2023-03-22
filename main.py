@@ -16,7 +16,10 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS EMPLOYEE (
     Salary INTEGER,
     Birthday DATE,
     Address TEXT,
-    JobTitle TEXT CHECK JobTitle IN ('Doctor', 'Nurse', 'Technician'),
+    JobTitle TEXT,
+    CHECK (JobTitle = 'Doctor'),
+    CHECK (JobTitle = 'Nurse'),
+    CHECK (JobTitle = 'Technician')
 )""")
                
 
@@ -28,7 +31,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT (
     Minit TEXT,
     Insurance TEXT,
     TotalCost INTEGER,
-    Address TEXT,
+    Address TEXT
 )""")
 
 #Create Visitor table
@@ -38,19 +41,19 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS VISITOR (
     Fname TEXT,
     Lname TEXT,
     Minit TEXT,
-    PRIMARY KEY (PatientID, Phone),
+    PRIMARY KEY (PatientID, Phone)
 )""")
 
 #Create EmployeePhone table
 cursor.execute("""CREATE TABLE IF NOT EXISTS EMPLOYEE_PHONE (
     SSN INTEGER PRIMARY KEY NOT NULL,
-    Phone TEXT,
+    Phone TEXT
 )""")
 
 #Create PatientPhone table
 cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT_PHONE (
     PatientID INTEGER PRIMARY KEY NOT NULL,
-    Phone TEXT,
+    Phone TEXT
 )""")
 
 #Create PatientDiagnosis table
@@ -64,7 +67,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS DEPARTMENT (
     Dnumber INTEGER PRIMARY KEY NOT NULL,
     NumberOfEmployees INTEGER,
     Dlocation TEXT,
-    Dname TEXT,
+    Dname TEXT
 )""")
 
 #Create Machines table
@@ -72,6 +75,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS MACHINES (
     ModelNumber INTEGER PRIMARY KEY NOT NULL,
     Type TEXT,
     Dnumber INTEGER,
+    FOREIGN KEY (Dnumber) REFERENCES DEPARTMENT (Dnumber)
 )""")
 
 #Create Medications table
@@ -79,13 +83,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS MEDICATIONS (
     Name TEXT PRIMARY KEY NOT NULL,
     DiseasesTreated TEXT,
     Cost INTEGER,
-    SideEffects TEXT,
+    SideEffects TEXT
 )""")
 
 #Create Rooms table
 cursor.execute("""CREATE TABLE IF NOT EXISTS ROOMS (
     RoomNumber INTEGER PRIMARY KEY NOT NULL,
-    Dnumber INTEGER,
+    Dnumber INTEGER
 )""")
 
 #Create WorksIn table
@@ -93,7 +97,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS WORKS_IN (
     SSN INTEGER NOT NULL,
     Dnumber INTEGER NOT NULL,
     Hours INTEGER,
-    PRIMARY KEY (SSN, Dnumber),
+    PRIMARY KEY (SSN, Dnumber)
 )""")
 
 #Create Uses table
@@ -101,13 +105,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS USES (
     SSN INTEGER NOT NULL,
     ModelNumber INTEGER NOT NULL,
     DateUsed DATE,
-    PRIMARY KEY (SSN, ModelNumber),
+    PRIMARY KEY (SSN, ModelNumber)
 )""")
 
 #Create UsedToTreat table
 cursor.execute("""CREATE TABLE IF NOT EXISTS USED_TO_TREAT (
-    MedicationName TEXT NOT NULL,
-    Diagnosis TEXT NOT NULL,
+    MedicationName TEXT PRIMARY KEY NOT NULL,
+    Diagnosis TEXT NOT NULL
 )""")
                
 #Create Appointment table
@@ -118,6 +122,9 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS APPOINTMENT (
     DoctorSSN INTEGER,
     AppointmentDate DATE,
     AppointmentTime TIME,
+    FOREIGN KEY (PatientID) REFERENCES PATIENT(PatientID),
+    FOREIGN KEY (NurseSSN) REFERENCES EMPLOYEE(SSN),
+    FOREIGN KEY (DoctorSSN) REFERENCES EMPLOYEE(SSN)
 )""")
 
 #Commit changes
