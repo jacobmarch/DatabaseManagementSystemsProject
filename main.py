@@ -59,7 +59,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT_PHONE (
 #Create PatientDiagnosis table
 cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT_DIAGNOSIS (
     PatientID INTEGER PRIMARY KEY NOT NULL,
-    Diagnosis TEXT,
+    Diagnosis TEXT
 )""")
 
 #Create Department table
