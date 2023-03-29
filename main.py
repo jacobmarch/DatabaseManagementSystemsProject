@@ -2,130 +2,60 @@
 import sqlite3 as sql
 
 #Connect to database
-conn = sql.connect('database.db')
+conn = sql.connect('databaseHayden.db')
 
 #Create a cursor
 cursor = conn.cursor()
 
-#Create Employee table
-cursor.execute("""CREATE TABLE IF NOT EXISTS EMPLOYEE (
-    SSN INTEGER PRIMARY KEY NOT NULL,
-    Fname TEXT,
-    Lname TEXT,
-    Minit TEXT,
-    Salary INTEGER,
-    Birthday DATE,
-    Address TEXT,
-    JobTitle TEXT,
-    CHECK (JobTitle = 'Doctor'),
-    CHECK (JobTitle = 'Nurse'),
-    CHECK (JobTitle = 'Technician')
-)""")
-               
+#Create a query and execute it
+cursor.execute("""SELECT Fname, Lname
+                  FROM EMPLOYEE
+                  WHERE JobTitle = 'doctor';""")
 
-#Create Patient table
-cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT (
-    ID INTEGER PRIMARY KEY NOT NULL,
-    Fname TEXT,
-    Lname TEXT,
-    Minit TEXT,
-    Insurance TEXT,
-    TotalCost INTEGER,
-    Address TEXT
-)""")
+cursor.execute("""SELECT M.ModelNumber, D.Dlocation
+                  FROM MACHINES M
+                  JOIN DEPARTMENT D ON M.Dnumber = D.Dnumber;""")
 
-#Create Visitor table
-cursor.execute("""CREATE TABLE IF NOT EXISTS VISITOR (
-    PatientID INTEGER NOT NULL,
-    Phone TEXT NOT NULL,
-    Fname TEXT,
-    Lname TEXT,
-    Minit TEXT,
-    PRIMARY KEY (PatientID, Phone)
-)""")
+cursor.execute("""SELECT P.ID, P.Fname AS PatientFirstName, P.Lname AS PatientLastName, E.Fname AS NurseFirstName, E.Lname AS NurseLastName
+                  FROM PATIENT P
+                  JOIN APPOINTMENT A ON P.ID = A.PatientID
+                  JOIN EMPLOYEE E ON A.NurseSSN = E.SSN;""")
 
-#Create EmployeePhone table
-cursor.execute("""CREATE TABLE IF NOT EXISTS EMPLOYEE_PHONE (
-    SSN INTEGER PRIMARY KEY NOT NULL,
-    Phone TEXT
-)""")
+cursor.execute("""SELECT V.Fname, V.Lname, V.Phone
+                  FROM VISITOR V
+                  WHERE V.PatientID = 2;""")
 
-#Create PatientPhone table
-cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT_PHONE (
-    PatientID INTEGER PRIMARY KEY NOT NULL,
-    Phone TEXT
-)""")
+cursor.execute("""SELECT Fname, Lname
+                  FROM EMPLOYEE
+                  WHERE Salary > 75000;""")
 
-#Create PatientDiagnosis table
-cursor.execute("""CREATE TABLE IF NOT EXISTS PATIENT_DIAGNOSIS (
-    PatientID INTEGER PRIMARY KEY NOT NULL,
-    Diagnosis TEXT
-)""")
+cursor.execute("""SELECT A.PatientID, P.Fname AS PatientFirstName, P.Lname AS PatientLastName, EN.Fname AS NurseFirstName, EN.Lname AS NurseLastName, ED.Fname AS DoctorFirstName, ED.Lname AS DoctorLastName
+                  FROM APPOINTMENT A
+                  JOIN PATIENT P ON A.PatientID = P.ID
+                  JOIN EMPLOYEE EN ON A.NurseSSN = EN.SSN
+                  JOIN EMPLOYEE ED ON A.DoctorSSN = ED.SSN
+                  WHERE A.AppointmentDate = DATE('now');""")
 
-#Create Department table
-cursor.execute("""CREATE TABLE IF NOT EXISTS DEPARTMENT (
-    Dnumber INTEGER PRIMARY KEY NOT NULL,
-    NumberOfEmployees INTEGER,
-    Dlocation TEXT,
-    Dname TEXT
-)""")
+cursor.execute("""SELECT AVG(Salary) AS AvgSalary
+                  FROM EMPLOYEE
+                  WHERE SSN IN (SELECT SSN FROM WORKS_IN WHERE Dnumber = 2);""")
 
-#Create Machines table
-cursor.execute("""CREATE TABLE IF NOT EXISTS MACHINES (
-    ModelNumber INTEGER PRIMARY KEY NOT NULL,
-    Type TEXT,
-    Dnumber INTEGER,
-    FOREIGN KEY (Dnumber) REFERENCES DEPARTMENT (Dnumber)
-)""")
+cursor.execute("""SELECT P.ID, P.Fname, P.Lname
+                  FROM PATIENT P
+                  JOIN PATIENT_DIAGNOSIS PD ON P.ID = PD.PatientID
+                  GROUP BY P.ID, P.Fname, P.Lname
+                  HAVING COUNT(PD.Diagnosis) > 1;""")
 
-#Create Medications table
-cursor.execute("""CREATE TABLE IF NOT EXISTS MEDICATIONS (
-    Name TEXT PRIMARY KEY NOT NULL,
-    DiseasesTreated TEXT,
-    Cost INTEGER,
-    SideEffects TEXT
-)""")
+cursor.execute("""SELECT A.AppointmentNumber, P.Fname AS PatientFirstName, P.Lname AS PatientLastName, A.AppointmentDate, A.AppointmentTime
+                  FROM APPOINTMENT A
+                  JOIN PATIENT P ON A.PatientID = P.ID
+                  JOIN EMPLOYEE E ON A.DoctorSSN = E.SSN
+                  WHERE E.Lname = 'Smith';""")
 
-#Create Rooms table
-cursor.execute("""CREATE TABLE IF NOT EXISTS ROOMS (
-    RoomNumber INTEGER PRIMARY KEY NOT NULL,
-    Dnumber INTEGER
-)""")
-
-#Create WorksIn table
-cursor.execute("""CREATE TABLE IF NOT EXISTS WORKS_IN (
-    SSN INTEGER NOT NULL,
-    Dnumber INTEGER NOT NULL,
-    Hours INTEGER,
-    PRIMARY KEY (SSN, Dnumber)
-)""")
-
-#Create Uses table
-cursor.execute("""CREATE TABLE IF NOT EXISTS USES (
-    SSN INTEGER NOT NULL,
-    ModelNumber INTEGER NOT NULL,
-    DateUsed DATE,
-    PRIMARY KEY (SSN, ModelNumber)
-)""")
-
-#Create UsedToTreat table
-cursor.execute("""CREATE TABLE IF NOT EXISTS USED_TO_TREAT (
-    MedicationName TEXT PRIMARY KEY NOT NULL,
-    Diagnosis TEXT NOT NULL
-)""")
-               
-#Create Appointment table
-cursor.execute("""CREATE TABLE IF NOT EXISTS APPOINTMENT (
-    AppointmentNumber INTEGER PRIMARY KEY NOT NULL,
-    PatientID INTEGER,
-    NurseSSN INTEGER,
-    DoctorSSN INTEGER,
-    AppointmentDate DATE,
-    AppointmentTime TIME,
-    FOREIGN KEY (PatientID) REFERENCES PATIENT(PatientID),
-    FOREIGN KEY (NurseSSN) REFERENCES EMPLOYEE(SSN),
-    FOREIGN KEY (DoctorSSN) REFERENCES EMPLOYEE(SSN)
-)""")
+cursor.execute("""SELECT P.ID, P.Fname, P.Lname
+                  FROM PATIENT P
+                  JOIN ROOMS R ON P.ID = R.PatientID
+                  WHERE R.RoomType = 'standard';""")
 
 #Commit changes
 conn.commit()
