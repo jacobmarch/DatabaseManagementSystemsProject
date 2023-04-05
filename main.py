@@ -77,7 +77,7 @@ cursor.execute("""SELECT P.ID, P.Fname, P.Lname
 
 query10 = cursor.fetchall()
 
-print(query1)
+print(query4)
 
 #Commit changes
 conn.commit()
