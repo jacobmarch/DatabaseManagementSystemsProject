@@ -29,7 +29,7 @@ query3 = cursor.fetchall()
 
 cursor.execute("""SELECT V.Fname, V.Lname, V.Phone
                   FROM VISITOR V
-                  WHERE V.PatientID = 2;""")
+                  WHERE V.PatientID = 64;""")
 
 query4 = cursor.fetchall()
 
@@ -44,7 +44,7 @@ cursor.execute("""SELECT A.PatientID, P.Fname AS PatientFirstName, P.Lname AS Pa
                   JOIN PATIENT P ON A.PatientID = P.ID
                   JOIN EMPLOYEE EN ON A.NurseSSN = EN.SSN
                   JOIN EMPLOYEE ED ON A.DoctorSSN = ED.SSN
-                  WHERE A.AppointmentDate = DATE('now');""")
+                  WHERE A.AppointmentDate = '5/23/23';""")
 
 query6 = cursor.fetchall()
 
@@ -54,11 +54,24 @@ cursor.execute("""SELECT AVG(Salary) AS AvgSalary
 
 query7 = cursor.fetchall()
 
-cursor.execute("""SELECT P.ID, P.Fname, P.Lname
-                  FROM PATIENT P
-                  JOIN PATIENT_DIAGNOSIS PD ON P.ID = PD.PatientID
-                  GROUP BY P.ID, P.Fname, P.Lname
-                  HAVING COUNT(PD.Diagnosis) > 1;""")
+cursor.execute("""SELECT
+    P.ID AS PatientID,
+    P.Fname AS PatientFirstName,
+    P.Lname AS PatientLastName
+FROM
+    PATIENT P
+    JOIN (
+        SELECT
+            PatientID,
+            COUNT(DiagnosisID) as Diagnosis
+        FROM
+            PATIENT_DIAGNOSIS
+        GROUP BY
+            PatientID
+        HAVING
+            COUNT(DiagnosisID) > 1
+    ) MULTIPLE_PD ON P.ID = MULTIPLE_PD.PatientID;
+""")
 
 query8 = cursor.fetchall()
 
@@ -66,7 +79,7 @@ cursor.execute("""SELECT A.AppointmentNumber, P.Fname AS PatientFirstName, P.Lna
                   FROM APPOINTMENT A
                   JOIN PATIENT P ON A.PatientID = P.ID
                   JOIN EMPLOYEE E ON A.DoctorSSN = E.SSN
-                  WHERE E.Lname = 'Smith';""")
+                  WHERE E.Lname = 'Miller';""")
 
 query9 = cursor.fetchall()
 
@@ -77,7 +90,7 @@ cursor.execute("""SELECT P.ID, P.Fname, P.Lname
 
 query10 = cursor.fetchall()
 
-print(query4)
+print(query8)
 
 #Commit changes
 conn.commit()
